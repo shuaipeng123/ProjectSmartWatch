@@ -10,6 +10,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -18,8 +19,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,10 +34,13 @@ import android.telephony.PhoneStateListener;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -43,6 +49,8 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import java.nio.ByteBuffer;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HomeScreen extends AppCompatActivity implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks {
     static final int MY_PERMISSIONS_REQUEST_CALLPHONE = 1;
@@ -56,11 +64,46 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
     GraphView graph;
     int dataSize = 0;
-
+    private DocumentReference mDocRef= FirebaseFirestore.getInstance().document("sampleData/inspiration");
+    public static final String TAG="Inspiration quote";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
+        EditText sentence=(EditText)findViewById(R.id.editText);
+        sentence.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                Log.d(TAG,charSequence.toString());
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                Log.d(TAG,charSequence.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                Log.d(TAG,editable.toString());
+            }
+        });
+        String sen=sentence.getText().toString();
+        if(sen.isEmpty()){
+            return;
+        }
+        Map<String,Object> dataTosave=new HashMap<String,Object>();
+        dataTosave.put("quote",sen);
+        mDocRef.set(dataTosave).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG,"Document has been saved");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG,"Document was not saved",e);
+            }
+        });
         Log.i("HomeScreen", "OnCreate");
         appData = Model.getInstance(getApplicationContext());
 
@@ -459,7 +502,9 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     public void onConnectionSuspended(int i) {
         Toast.makeText(getApplicationContext(), "Suspended", Toast.LENGTH_LONG).show();
     }
+    public void saveSentence(View view){
 
+    }
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         message = messageEvent.getPath();

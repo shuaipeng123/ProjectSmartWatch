@@ -109,6 +109,16 @@
                 app:layout_constraintBottom_toTopOf="@+id/input"
                 app:layout_constraintVertical_bias="0.781" />
 
+            <EditText
+                android:id="@+id/editText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:text="Name"
+                tools:layout_editor_absoluteX="10dp"
+                tools:layout_editor_absoluteY="387dp" />
+
         </android.support.constraint.ConstraintLayout>
 
     </FrameLayout>
