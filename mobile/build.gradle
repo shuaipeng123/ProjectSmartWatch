@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.health_e"
         minSdkVersion 21
@@ -29,15 +29,20 @@ dependencies {
     })
     wearApp project(':wear')
     compile 'com.jjoe64:graphview:4.2.1'
-    compile 'com.google.android.gms:play-services-wearable:11.4.2'
-    compile 'com.google.android.gms:play-services:11.4.2'
+    compile 'com.google.android.gms:play-services-wearable:11.6.0'      //  AliN 11.4.2
+    compile 'com.google.android.gms:play-services:11.6.0'               //  AliN 11.4.2
     compile 'com.android.support:appcompat-v7:25.2.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:design:25.2.0'
     compile 'com.android.support:support-v4:25.2.0'
     testCompile 'junit:junit:4.12'
-    compile 'com.google.firebase:firebase-core:11.4.2'
-    compile 'com.google.firebase:firebase-firestore:11.4.2'
+    compile 'com.google.firebase:firebase-core:11.6.0'
+    compile 'com.google.firebase:firebase-database:11.6.0'
+//    compile 'com.google.firebase:firebase-firestore:11.4.2'
+    compile 'com.google.firebase:firebase-auth:11.6.0'
 }
+
+
+
 
 apply plugin: 'com.google.gms.google-services'

@@ -34,13 +34,20 @@ import android.telephony.PhoneStateListener;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
+//import com.google.firebase.firestore.DocumentReference;   // AliN
+//import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -64,12 +71,15 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
     GraphView graph;
     int dataSize = 0;
-    private DocumentReference mDocRef= FirebaseFirestore.getInstance().document("sampleData/inspiration");
+    // private DocumentReference mDocRef= FirebaseFirestore.getInstance().document("sampleData/inspiration");   AliN
     public static final String TAG="Inspiration quote";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
+
         EditText sentence=(EditText)findViewById(R.id.editText);
         sentence.addTextChangedListener(new TextWatcher() {
             @Override
@@ -91,19 +101,24 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         if(sen.isEmpty()){
             return;
         }
-        Map<String,Object> dataTosave=new HashMap<String,Object>();
-        dataTosave.put("quote",sen);
-        mDocRef.set(dataTosave).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG,"Document has been saved");
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.w(TAG,"Document was not saved",e);
-            }
-        });
+//        Map<String,Object> dataTosave=new HashMap<String,Object>();        // AliN
+//        dataTosave.put("quote",sen);
+//        mDocRef.set(dataTosave).addOnSuccessListener(new OnSuccessListener<Void>() {
+//            @Override
+//            public void onSuccess(Void aVoid) {
+//                Log.d(TAG,"Document has been saved");
+//            }
+//        }).addOnFailureListener(new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception e) {
+//                Log.w(TAG,"Document was not saved",e);
+//            }
+//        });
+        // Write a message to the database
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("message");
+        myRef.setValue("Hello, World!");
+
         Log.i("HomeScreen", "OnCreate");
         appData = Model.getInstance(getApplicationContext());
 
@@ -333,7 +348,8 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         input.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(HomeScreen.this, Input.class));
+                 startActivity(new Intent(HomeScreen.this, Input.class));
+//                startActivity(new Intent(HomeScreen.this, UserProfile.class));
             }
         });
 
@@ -455,6 +471,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     protected void onStart() {
         super.onStart();
         Log.i("HomeScreen", "OnStart");
+
         googleApiClient.connect();
 
         // Reload location
@@ -489,6 +506,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
             googleApiClient.disconnect();
         }
 
+        FirebaseAuth.getInstance().signOut();
         super.onStop();
     }
 

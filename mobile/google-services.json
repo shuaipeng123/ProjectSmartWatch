@@ -1,35 +1,27 @@
 {
   "project_info": {
-    "project_number": "82941004696",
-    "firebase_url": "https://health-e-8b02e.firebaseio.com",
-    "project_id": "health-e-8b02e",
-    "storage_bucket": "health-e-8b02e.appspot.com"
+    "project_number": "163149250970",
+    "firebase_url": "https://remote-health-monitoring.firebaseio.com",
+    "project_id": "remote-health-monitoring",
+    "storage_bucket": "remote-health-monitoring.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:82941004696:android:92cbfd0781999496",
+        "mobilesdk_app_id": "1:163149250970:android:92cbfd0781999496",
         "android_client_info": {
           "package_name": "com.health_e"
         }
       },
       "oauth_client": [
         {
-          "client_id": "82941004696-p9p2626625val3v7r3jnvq5shjqa3poc.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.health_e",
-            "certificate_hash": "854ee277b32ce6e2c10b2af774e13cc08a101689"
-          }
-        },
-        {
-          "client_id": "82941004696-o3tijv1k7n7csnen6ofgh9rbmb8htntu.apps.googleusercontent.com",
+          "client_id": "163149250970-k6a3d40afttne4olpb66un0p73ighcu7.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBLGzKRZ21c7-jrXfqopqPCZl-DqX3m6Nc"
+          "current_key": "AIzaSyBespoKaPBYvW7pjIAqLOXK_UaHTyvn-ik"
         }
       ],
       "services": {
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "82941004696-o3tijv1k7n7csnen6ofgh9rbmb8htntu.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2
