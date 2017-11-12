@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HEALTH-E</string>
+    <string name="app_name">RHM</string>
     <string name="title_activity_home_screen">HomeScreen</string>
     <string name="title_home">Home</string>
     <string name="title_activity_settings">Settings</string>
@@ -46,7 +46,7 @@
 
     <!-- Example settings for History -->
     <string name="pref_header_history">View History</string>
-    <string name="title_activity_login">Sign in</string>
+    <string name="title_activity_login">RHM</string>
 
     <!-- String related to signUp -->
     <string name="action_sign_in_shortFirebase">Register</string>

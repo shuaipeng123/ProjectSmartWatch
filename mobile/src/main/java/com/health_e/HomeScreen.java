@@ -41,13 +41,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
-//import com.google.firebase.firestore.DocumentReference;   // AliN
-//import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.IgnoreExtraProperties;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -73,7 +71,59 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     int dataSize = 0;
     // private DocumentReference mDocRef= FirebaseFirestore.getInstance().document("sampleData/inspiration");   AliN
     public static final String TAG="Inspiration quote";
+//    private DatabaseReference mDatabase;
+    private FirebaseAuth auth;
 
+//    @IgnoreExtraProperties
+//    public class Profile {
+//        public String userId;
+//        public String email;
+//        public String name;
+//        public String userType;
+//        public String age;
+//        public String emergName;
+//        public String emergNum;
+//
+//        public Profile() {
+//            // Default constructor required for calls to DataSnapshot.getValue(Post.class)
+//        }
+//
+//        public Profile(String userId, String email, String name, String userType, String age, String emergName, String emergNum) {
+//            this.userId = userId;
+//            this.email = email;
+//            this.name = name;
+//            this.userType = userType;
+//            this.age = age;
+//            this.emergName = emergName;
+//            this.emergNum = emergNum;
+//        }
+//
+//        @Exclude
+//        public Map<String, Object> toMap() {
+//            HashMap<String, Object> result = new HashMap<>();
+//            result.put("userId", userId);
+//            result.put("email", email);
+//            result.put("name", name);
+//            result.put("userType", userType);
+//            result.put("age", age);
+//            result.put("emergName", emergName);
+//            result.put("emergNum", emergNum);
+//            return result;
+//        }
+//    }
+//
+//    private void writeNewProfile(String userId, String email, String name, String userType, String age, String emerg_name, String emerg_num) {
+//        // Create new post at /user-posts/$userid/$postid and at
+//        // /posts/$postid simultaneously
+//        String key = mDatabase.child("Profile").push().getKey();
+//        Profile profile = new Profile(userId, email, name, userType, age, emerg_name, emerg_num);
+//        Map<String, Object> profileValues = profile.toMap();
+//
+//        Map<String, Object> childUpdates = new HashMap<>();
+////        childUpdates.put("/profiles/" + key, profileValues);
+//        childUpdates.put("/userNames/" + userId , profileValues);
+//        mDatabase.updateChildren(childUpdates);
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,13 +165,19 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 //            }
 //        });
         // Write a message to the database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("message");
-        myRef.setValue("Hello, World!");
+//        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         Log.i("HomeScreen", "OnCreate");
         appData = Model.getInstance(getApplicationContext());
 
+        auth = FirebaseAuth.getInstance();
+        Toast.makeText(getApplicationContext(), auth.getCurrentUser().getEmail(),
+                Toast.LENGTH_LONG).show();
+
+//        writeNewProfile("uid2","c@c.c", appData.getName()+"11","Family",appData.getAge()+"11",appData.getEmerName()+"11",appData.getEmerNum()+"11");
+//        writeNewProfile("uid3","d@c.c", appData.getName()+"12","Physician",appData.getAge()+"11",appData.getEmerName()+"11",appData.getEmerNum()+"11");
+
+        /*
         // First time the app is loaded
         if (appData.getName().equals("def_name"))
         {
@@ -234,7 +290,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                     }
                 }
             });
-        }
+        }*/
 
         location = LocationServices.getFusedLocationProviderClient(this);
         googleApiClient = new GoogleApiClient.Builder(this)
@@ -505,8 +561,8 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
             Wearable.MessageApi.removeListener(googleApiClient, this);
             googleApiClient.disconnect();
         }
-
-        FirebaseAuth.getInstance().signOut();
+// TODO signout
+//        FirebaseAuth.getInstance().signOut();
         super.onStop();
     }
 

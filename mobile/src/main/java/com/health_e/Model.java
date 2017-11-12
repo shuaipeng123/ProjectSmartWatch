@@ -24,7 +24,7 @@ public class Model implements Serializable {
     private static Model singletonModel;
     private static File mfile;
     private static File mHistory;
-    private String name = "def_name", emer_name = "def_contact", age = "def_age", emer_num = "def_contact_num";
+    private String name = "def_name", userType = "def_type", emer_name = "def_contact", age = "def_age", emer_num = "def_contact_num";
     private int hr = 0, temp, bp;
     private double lat, lon;
     private Calendar update;
@@ -79,6 +79,7 @@ public class Model implements Serializable {
             objectInputStream.close();
             fileInputStream.close();
             this.name = singletonModel.name;
+            this.userType = singletonModel.userType;
             this.age = singletonModel.age;
             this.emer_name = singletonModel.emer_name;
             this.emer_num = singletonModel.emer_num;
@@ -133,6 +134,8 @@ public class Model implements Serializable {
         return name;
     }
 
+    public String getUserType() {return userType;}
+
     public String getAge() {
         return age;
     }
@@ -178,6 +181,8 @@ public class Model implements Serializable {
     public void setName(String s) {
         name = s;
     }
+
+    public void setUserType(String t) {userType = t;}
 
     public void setAge(String s) {
         age = s;

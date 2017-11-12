@@ -73,10 +73,12 @@ public class LoginActivity extends AppCompatActivity {
         //Get Firebase auth instance
         auth = FirebaseAuth.getInstance();
 
-        if (auth.getCurrentUser() != null) {
-            startActivity(new Intent(LoginActivity.this, HomeScreen.class));
-            finish();
-        }
+        // TODO always need sign in for debug
+//        if (auth.getCurrentUser() != null) {
+//            Toast.makeText(getApplicationContext(), "already logged in!", Toast.LENGTH_SHORT).show();
+//            startActivity(new Intent(LoginActivity.this, HomeScreen.class));
+//            finish();
+//        }
 
         // set the view now
         setContentView(R.layout.activity_login);
@@ -154,10 +156,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-
-    //TODO SignOut
-    //    auth.signOut();
-
     // this listener will be called when there is change in firebase user session
     FirebaseAuth.AuthStateListener authListener = new FirebaseAuth.AuthStateListener() {
         @Override
@@ -219,9 +217,3 @@ public class LoginActivity extends AppCompatActivity {
 //        }
 
 }
-
-//TODO    Checking User Session
-//auth = FirebaseAuth.getInstance();
-//        if (auth.getCurrentUser() != null) {
-//        // User is logged in
-//        }

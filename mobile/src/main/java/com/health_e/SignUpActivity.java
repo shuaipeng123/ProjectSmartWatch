@@ -5,8 +5,12 @@ package com.health_e;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.text.TextUtils;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,6 +21,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.IgnoreExtraProperties;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -24,6 +35,59 @@ public class SignUpActivity extends AppCompatActivity {
     private Button btnSignIn, btnSignUp, btnResetPassword;
     private ProgressBar progressBar;
     private FirebaseAuth auth;
+    private DatabaseReference mDatabase;
+    Model appData;
+
+    @IgnoreExtraProperties
+    public class Profile {
+        public String userId;
+        public String email;
+        public String name;
+        public String userType;
+        public String age;
+        public String emergName;
+        public String emergNum;
+
+        public Profile() {
+            // Default constructor required for calls to DataSnapshot.getValue(Post.class)
+        }
+
+        public Profile(String userId, String email, String name, String userType, String age, String emergName, String emergNum) {
+            this.userId = userId;
+            this.email = email;
+            this.name = name;
+            this.userType = userType;
+            this.age = age;
+            this.emergName = emergName;
+            this.emergNum = emergNum;
+        }
+
+        @Exclude
+        public Map<String, Object> toMap() {
+            HashMap<String, Object> result = new HashMap<>();
+            result.put("userId", userId);
+            result.put("email", email);
+            result.put("name", name);
+            result.put("userType", userType);
+            result.put("age", age);
+            result.put("emergName", emergName);
+            result.put("emergNum", emergNum);
+            return result;
+        }
+    }
+
+    private void writeNewProfile(String userId, String email, String name, String userType, String age, String emerg_name, String emerg_num) {
+        // Create new post at /user-posts/$userid/$postid and at
+        // /posts/$postid simultaneously
+        String key = mDatabase.child("Profile").push().getKey();
+        Profile profile = new Profile(userId, email, name, userType, age, emerg_name, emerg_num);
+        Map<String, Object> profileValues = profile.toMap();
+
+        Map<String, Object> childUpdates = new HashMap<>();
+//        childUpdates.put("/profiles/" + key, profileValues);
+        childUpdates.put("/users/" + userId , profileValues);
+        mDatabase.updateChildren(childUpdates);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +96,154 @@ public class SignUpActivity extends AppCompatActivity {
 
         //Get Firebase auth instance
         auth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        // ask for user info
+        appData = Model.getInstance(getApplicationContext());
+
+        final EditText nameInput = new EditText(this);
+        nameInput.setInputType(InputType.TYPE_CLASS_TEXT);
+
+        final EditText userTypeInput = new EditText(this);
+        userTypeInput.setInputType(InputType.TYPE_CLASS_TEXT);
+
+        final EditText ageInput = new EditText(this);
+        ageInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+        ageInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(3)});
+
+        final EditText contactInput = new EditText(this);
+        contactInput.setInputType(InputType.TYPE_CLASS_TEXT);
+
+        final EditText contactNumInput = new EditText(this);
+        contactNumInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+        contactNumInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(11)});
+
+//        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(NewCase.this, R.style.AlertDialogCustom));
+
+        final AlertDialog warn = new AlertDialog.Builder(new ContextThemeWrapper(this,R.style.AlertDialogCustom))
+                .setTitle("WARNING")
+                .setMessage("The field is empty!")
+                .setPositiveButton("Okay", null)
+                .setCancelable(false)
+                .create();
+
+        final AlertDialog name = new AlertDialog.Builder(new ContextThemeWrapper(this,R.style.AlertDialogCustom))
+                .setMessage("What is your name?")
+                .setTitle("Welcome!")
+                .setPositiveButton("Next", null)
+                .setView(nameInput)
+                .setCancelable(false)
+                .create();
+
+        final AlertDialog userType = new AlertDialog.Builder(new ContextThemeWrapper(this,R.style.AlertDialogCustom))
+                .setMessage("Please select user type:")
+                .setTitle("Welcome!")
+                .setPositiveButton("Patient",null)
+                .setNegativeButton("Family",null)
+//                .setView(userTypeInput)
+                .setCancelable(false)
+                .create();
+
+        final AlertDialog age = new AlertDialog.Builder(new ContextThemeWrapper(this,R.style.AlertDialogCustom))
+                .setMessage("How old are you?")
+                .setTitle("Welcome!")
+                .setPositiveButton("Next", null)
+                .setView(ageInput)
+                .setCancelable(false)
+                .create();
+
+        final AlertDialog contact = new AlertDialog.Builder(new ContextThemeWrapper(this,R.style.AlertDialogCustom))
+                .setMessage("Emergency Contact Name")
+                .setTitle("Welcome!")
+                .setPositiveButton("Next", null)
+                .setView(contactInput)
+                .setCancelable(false)
+                .create();
+
+        final AlertDialog contactNum = new AlertDialog.Builder(new ContextThemeWrapper(this,R.style.AlertDialogCustom))
+                .setMessage("Emergency Contact Number")
+                .setTitle("Welcome!")
+                .setPositiveButton("Next", null)
+                .setView(contactNumInput)
+                .setCancelable(false)
+                .create();
+
+        contactNum.show();
+        contact.show();
+        age.show();
+        userType.show();
+        name.show();
+
+        name.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String s = nameInput.getText().toString();
+                if (s.length() > 0) {
+                    appData.setName(s);
+                    name.dismiss();
+                } else {
+                    warn.show();
+                }
+            }
+        });
+
+        userType.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                appData.setUserType("Patient");
+                userType.dismiss();
+            }
+        });
+
+        userType.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                appData.setUserType("Family");
+                userType.dismiss();
+                contactNum.dismiss();
+                contact.dismiss();
+                age.dismiss();
+            }
+        });
+
+        age.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String s = ageInput.getText().toString();
+                if (s.length() > 0) {
+                    appData.setAge(s);
+                    age.dismiss();
+                } else {
+                    warn.show();
+                }
+            }
+        });
+
+
+        contact.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String s = contactInput.getText().toString();
+                if (s.length() > 0) {
+                    appData.setEmerName(s);
+                    contact.dismiss();
+                } else {
+                    warn.show();
+                }
+            }
+        });
+
+        contactNum.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String s = contactNumInput.getText().toString();
+                if (s.length() > 0) {
+                    appData.setEmerNum(s);
+                    contactNum.dismiss();
+                } else {
+                    warn.show();
+                }
+            }
+        });
 
         btnSignIn = (Button) findViewById(R.id.sign_in_button);
         btnSignUp = (Button) findViewById(R.id.sign_up_button);
@@ -58,7 +270,7 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                String email = inputEmail.getText().toString().trim();
+                final String email = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
 
                 if (TextUtils.isEmpty(email)) {
@@ -91,12 +303,14 @@ public class SignUpActivity extends AppCompatActivity {
                                     Toast.makeText(SignUpActivity.this, "Authentication failed." + task.getException(),
                                             Toast.LENGTH_SHORT).show();
                                 } else {
+                                    writeNewProfile(auth.getCurrentUser().getUid(),auth.getCurrentUser().getEmail(),
+                                            appData.getName(),appData.getUserType(),appData.getAge(),appData.getEmerName(),
+                                            appData.getEmerNum());
                                     startActivity(new Intent(SignUpActivity.this, HomeScreen.class)); // MainActivity
                                     finish();
                                 }
                             }
                         });
-
             }
         });
     }
@@ -107,3 +321,4 @@ public class SignUpActivity extends AppCompatActivity {
         progressBar.setVisibility(View.GONE);
     }
 }
+

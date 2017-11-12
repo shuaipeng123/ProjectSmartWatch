@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
     tools:context="com.health_e.Input">
 
     <EditText
@@ -78,14 +79,13 @@
 
     <Button
         android:id="@+id/submit"
-        style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="188dp"
         android:layout_height="63dp"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
-        android:background="#4286f4"
+        android:background="@color/colorAccent"
         android:text="Submit"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
