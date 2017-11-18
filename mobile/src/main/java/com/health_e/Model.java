@@ -5,6 +5,9 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,15 +22,18 @@ import java.util.Locale;
 import java.util.Vector;
 
 public class Model implements Serializable {
-    private static final String mfileName = "appData";
-    private static final String mHistoryName = "history";
+    private static final String mfileName = "appData" ;
     private static Model singletonModel;
     private static File mfile;
     private static File mHistory;
-    private String name = "def_name", userType = "def_type", emer_name = "def_contact", age = "def_age", emer_num = "def_contact_num";
+    private String name = "def_name", emer_name = "def_contact", age = "def_age", emer_num = "def_contact_num";
+    private Profile.UserType userType = Profile.UserType.PATIENT;
     private int hr = 0, temp, bp;
     private double lat, lon;
     private Calendar update;
+
+    private FirebaseAuth auth;
+    private DatabaseReference mDatabase;
 
     class info {
         int temp, bp, hr;
@@ -103,7 +109,6 @@ public class Model implements Serializable {
             c.get (Calendar.YEAR) > update.get (Calendar.YEAR)) {
             return true;
         }
-
         return false;
     }
 
@@ -134,7 +139,7 @@ public class Model implements Serializable {
         return name;
     }
 
-    public String getUserType() {return userType;}
+    public Profile.UserType getUserType() {return userType;}
 
     public String getAge() {
         return age;
@@ -182,7 +187,7 @@ public class Model implements Serializable {
         name = s;
     }
 
-    public void setUserType(String t) {userType = t;}
+    public void setUserType(Profile.UserType t) {userType = t;}
 
     public void setAge(String s) {
         age = s;

@@ -10,7 +10,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -19,33 +18,27 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
-import android.text.Editable;
-import android.text.InputFilter;
-import android.text.InputType;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.telephony.PhoneStateListener;
+import android.support.v7.widget.Toolbar;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Exclude;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.IgnoreExtraProperties;
+import com.google.firebase.database.ValueEventListener;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -54,8 +47,6 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import java.nio.ByteBuffer;
 import java.text.NumberFormat;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
 public class HomeScreen extends AppCompatActivity implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks {
     static final int MY_PERMISSIONS_REQUEST_CALLPHONE = 1;
@@ -70,227 +61,46 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     GraphView graph;
     int dataSize = 0;
     // private DocumentReference mDocRef= FirebaseFirestore.getInstance().document("sampleData/inspiration");   AliN
-    public static final String TAG="Inspiration quote";
-//    private DatabaseReference mDatabase;
     private FirebaseAuth auth;
-
-//    @IgnoreExtraProperties
-//    public class Profile {
-//        public String userId;
-//        public String email;
-//        public String name;
-//        public String userType;
-//        public String age;
-//        public String emergName;
-//        public String emergNum;
-//
-//        public Profile() {
-//            // Default constructor required for calls to DataSnapshot.getValue(Post.class)
-//        }
-//
-//        public Profile(String userId, String email, String name, String userType, String age, String emergName, String emergNum) {
-//            this.userId = userId;
-//            this.email = email;
-//            this.name = name;
-//            this.userType = userType;
-//            this.age = age;
-//            this.emergName = emergName;
-//            this.emergNum = emergNum;
-//        }
-//
-//        @Exclude
-//        public Map<String, Object> toMap() {
-//            HashMap<String, Object> result = new HashMap<>();
-//            result.put("userId", userId);
-//            result.put("email", email);
-//            result.put("name", name);
-//            result.put("userType", userType);
-//            result.put("age", age);
-//            result.put("emergName", emergName);
-//            result.put("emergNum", emergNum);
-//            return result;
-//        }
-//    }
-//
-//    private void writeNewProfile(String userId, String email, String name, String userType, String age, String emerg_name, String emerg_num) {
-//        // Create new post at /user-posts/$userid/$postid and at
-//        // /posts/$postid simultaneously
-//        String key = mDatabase.child("Profile").push().getKey();
-//        Profile profile = new Profile(userId, email, name, userType, age, emerg_name, emerg_num);
-//        Map<String, Object> profileValues = profile.toMap();
-//
-//        Map<String, Object> childUpdates = new HashMap<>();
-////        childUpdates.put("/profiles/" + key, profileValues);
-//        childUpdates.put("/userNames/" + userId , profileValues);
-//        mDatabase.updateChildren(childUpdates);
-//    }
+    private DatabaseReference mDatabase;
+    private Profile profile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
-
-        EditText sentence=(EditText)findViewById(R.id.editText);
-        sentence.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Log.d(TAG,charSequence.toString());
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Log.d(TAG,charSequence.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                Log.d(TAG,editable.toString());
-            }
-        });
-        String sen=sentence.getText().toString();
-        if(sen.isEmpty()){
-            return;
-        }
-//        Map<String,Object> dataTosave=new HashMap<String,Object>();        // AliN
-//        dataTosave.put("quote",sen);
-//        mDocRef.set(dataTosave).addOnSuccessListener(new OnSuccessListener<Void>() {
-//            @Override
-//            public void onSuccess(Void aVoid) {
-//                Log.d(TAG,"Document has been saved");
-//            }
-//        }).addOnFailureListener(new OnFailureListener() {
-//            @Override
-//            public void onFailure(@NonNull Exception e) {
-//                Log.w(TAG,"Document was not saved",e);
-//            }
-//        });
-        // Write a message to the database
-//        mDatabase = FirebaseDatabase.getInstance().getReference();
-
         Log.i("HomeScreen", "OnCreate");
+        Toolbar appToolbar = (Toolbar) findViewById(R.id.app_toolbar);
+        setSupportActionBar(appToolbar);
+
         appData = Model.getInstance(getApplicationContext());
-
         auth = FirebaseAuth.getInstance();
-        Toast.makeText(getApplicationContext(), auth.getCurrentUser().getEmail(),
-                Toast.LENGTH_LONG).show();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
-//        writeNewProfile("uid2","c@c.c", appData.getName()+"11","Family",appData.getAge()+"11",appData.getEmerName()+"11",appData.getEmerNum()+"11");
-//        writeNewProfile("uid3","d@c.c", appData.getName()+"12","Physician",appData.getAge()+"11",appData.getEmerName()+"11",appData.getEmerNum()+"11");
-
-        /*
-        // First time the app is loaded
-        if (appData.getName().equals("def_name"))
-        {
-            final EditText nameInput = new EditText(this);
-            nameInput.setInputType(InputType.TYPE_CLASS_TEXT);
-
-            final EditText ageInput = new EditText(this);
-            ageInput.setInputType(InputType.TYPE_CLASS_NUMBER);
-            ageInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(3)});
-
-            final EditText contactInput = new EditText(this);
-            contactInput.setInputType(InputType.TYPE_CLASS_TEXT);
-
-            final EditText contactNumInput = new EditText(this);
-            contactNumInput.setInputType(InputType.TYPE_CLASS_NUMBER);
-            contactNumInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(11)});
-
-            final AlertDialog warn = new AlertDialog.Builder(this)
-                    .setTitle("WARNING")
-                    .setMessage("The field is empty!")
-                    .setPositiveButton("Okay", null)
-                    .setCancelable(false)
-                    .create();
-
-            final AlertDialog name = new AlertDialog.Builder(this)
-                    .setMessage("What is your name?")
-                    .setTitle("Welcome to HEALTH-E")
-                    .setPositiveButton("Next", null)
-                    .setView(nameInput)
-                    .setCancelable(false)
-                    .create();
-
-            final AlertDialog age = new AlertDialog.Builder(this)
-                    .setMessage("How old are you?")
-                    .setTitle("Welcome to HEALTH-E")
-                    .setPositiveButton("Next", null)
-                    .setView(ageInput)
-                    .setCancelable(false)
-                    .create();
-
-            final AlertDialog contact = new AlertDialog.Builder(this)
-                    .setMessage("Emergency Contact Name")
-                    .setTitle("Welcome to HEALTH-E")
-                    .setPositiveButton("Next", null)
-                    .setView(contactInput)
-                    .setCancelable(false)
-                    .create();
-
-            final AlertDialog contactNum = new AlertDialog.Builder(this)
-                    .setMessage("Emergency Contact Number")
-                    .setTitle("Welcome to HEALTH-E")
-                    .setPositiveButton("Next", null)
-                    .setView(contactNumInput)
-                    .setCancelable(false)
-                    .create();
-
-            contactNum.show();
-            contact.show();
-            age.show();
-            name.show();
-
-            name.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String s = nameInput.getText().toString();
-                    if (s.length() > 0) {
-                        appData.setName(s);
-                        name.dismiss();
-                    } else {
-                        warn.show();
+        ValueEventListener profileListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                try{
+                    profile = dataSnapshot.child("users").child(auth.getCurrentUser().getUid()).getValue(Profile.class);
+//                    Toast.makeText(getApplicationContext(),"Database read:" + profile.email +
+//                            " Physician:" + profile.physicianId,Toast.LENGTH_SHORT).show();
+                    if(profile.userType.equals(Profile.UserType.FAMILY))
+                    {
+                        startActivity(new Intent(HomeScreen.this, FamilyHomeScreen.class)); // Switch to Family member view
+                        finish();
                     }
+                }catch(Exception e)
+                {
+                    Toast.makeText(getApplicationContext(),"Profile query failed",Toast.LENGTH_SHORT).show();
                 }
-            });
+            }
 
-            age.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String s = ageInput.getText().toString();
-                    if (s.length() > 0) {
-                        appData.setAge(s);
-                        age.dismiss();
-                    } else {
-                        warn.show();
-                    }
-                }
-            });
-
-            contact.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String s = contactInput.getText().toString();
-                    if (s.length() > 0) {
-                        appData.setEmerName(s);
-                        contact.dismiss();
-                    } else {
-                        warn.show();
-                    }
-                }
-            });
-
-            contactNum.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String s = contactNumInput.getText().toString();
-                    if (s.length() > 0) {
-                        appData.setEmerNum(s);
-                        contactNum.dismiss();
-                    } else {
-                        warn.show();
-                    }
-                }
-            });
-        }*/
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("loadPost:onCancelled", databaseError.toException());
+            }
+        };
+        mDatabase.addValueEventListener(profileListener);
 
         location = LocationServices.getFusedLocationProviderClient(this);
         googleApiClient = new GoogleApiClient.Builder(this)
@@ -309,7 +119,9 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                                 appData.setLocation(l.getLatitude(), l.getLongitude());
 
                                 TextView loc1 = (TextView) findViewById(R.id.location);
-                                String m = "Your location: \n" + appData.getLocation(HomeScreen.this);
+                                String address = appData.getLocation(HomeScreen.this);
+                                mDatabase.child("users").child(auth.getCurrentUser().getUid()).child("locationAddress").setValue(address);
+                                String m = "Your location: \n" + address;
                                 loc1.setText(m);
                             }
                         }
@@ -326,7 +138,9 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                 if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                     TextView loc = (TextView) findViewById(R.id.location);
                     appData.setLocation(location.getLatitude(), location.getLongitude());
-                    String message = "Your location: \n" + appData.getLocation(HomeScreen.this);
+                    String address = appData.getLocation(HomeScreen.this);
+                    mDatabase.child("users").child(auth.getCurrentUser().getUid()).child("locationAddress").setValue(address);
+                    String message = "Your location: \n" + address;
                     loc.setText(message);
                 }
             }
@@ -342,7 +156,9 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                                         appData.setLocation(l.getLatitude(), l.getLongitude());
 
                                         TextView loc = (TextView) findViewById(R.id.location);
-                                        String message = "Your location: \n" + appData.getLocation(HomeScreen.this);
+                                        String address = appData.getLocation(HomeScreen.this);
+                                        mDatabase.child("users").child(auth.getCurrentUser().getUid()).child("locationAddress").setValue(address);
+                                        String message = "Your location: \n" + address;
                                         loc.setText(message);
                                     }
                                 }
@@ -361,7 +177,9 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                                         appData.setLocation(l.getLatitude(), l.getLongitude());
 
                                         TextView loc = (TextView) findViewById(R.id.location);
-                                        String m = "Your location: \n" + appData.getLocation(HomeScreen.this);
+                                        String address = appData.getLocation(HomeScreen.this);
+                                        mDatabase.child("users").child(auth.getCurrentUser().getUid()).child("locationAddress").setValue(address);
+                                        String m = "Your location: \n" + address;
                                         loc.setText(m);
                                     }
                                 }
@@ -373,6 +191,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
             public void onProviderDisabled(String provider) {
                 TextView loc = (TextView) findViewById(R.id.location);
                 String message = "Your location: \n location unavailable";
+                mDatabase.child("users").child(auth.getCurrentUser().getUid()).child("locationAddress").setValue("location unavailable");
                 loc.setText(message);
             }
         });
@@ -409,11 +228,16 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
             }
         });
 
-        Button call = (Button) findViewById(R.id.call);
+        Button call = (Button) findViewById(R.id.signOut);
         call.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                makeEmergencyCall();
+                //TODO emerg call instead off signout
+                Toast.makeText(getApplicationContext(), auth.getCurrentUser().getEmail() + " Signed out",
+                        Toast.LENGTH_LONG).show();
+                auth.signOut();
+                finish();
+//                makeEmergencyCall();
             }
         });
 
@@ -647,5 +471,11 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                 }
             }
         }
+    }
+
+    private void updateLocation(String userId, String locationAddress) {
+//    User user = new User(name, email);
+        mDatabase.child("users").child(userId).child("locationAddress").setValue(locationAddress);
+//        mDatabase.child("locations").child(userId).setValue(locationAddress);
     }
 }

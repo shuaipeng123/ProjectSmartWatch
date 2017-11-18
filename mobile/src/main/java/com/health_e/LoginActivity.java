@@ -74,11 +74,11 @@ public class LoginActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
 
         // TODO always need sign in for debug
-//        if (auth.getCurrentUser() != null) {
-//            Toast.makeText(getApplicationContext(), "already logged in!", Toast.LENGTH_SHORT).show();
-//            startActivity(new Intent(LoginActivity.this, HomeScreen.class));
-//            finish();
-//        }
+        if (auth.getCurrentUser() != null) {
+            Toast.makeText(getApplicationContext(), "already logged in!", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(LoginActivity.this, HomeScreen.class));
+            finish();
+        }
 
         // set the view now
         setContentView(R.layout.activity_login);
@@ -146,6 +146,8 @@ public class LoginActivity extends AppCompatActivity {
                                         Toast.makeText(LoginActivity.this, getString(R.string.auth_failed), Toast.LENGTH_LONG).show();
                                     }
                                 } else {
+                                    Toast.makeText(getApplicationContext(), auth.getCurrentUser().getEmail() + " Signed in",
+                                            Toast.LENGTH_SHORT).show();
                                     Intent intent = new Intent(LoginActivity.this, HomeScreen.class);
                                     startActivity(intent);
                                     finish();

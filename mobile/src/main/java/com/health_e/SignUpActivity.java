@@ -1,7 +1,5 @@
 package com.health_e;
 
-//package info.androidhive.firebase;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -38,49 +36,14 @@ public class SignUpActivity extends AppCompatActivity {
     private DatabaseReference mDatabase;
     Model appData;
 
-    @IgnoreExtraProperties
-    public class Profile {
-        public String userId;
-        public String email;
-        public String name;
-        public String userType;
-        public String age;
-        public String emergName;
-        public String emergNum;
-
-        public Profile() {
-            // Default constructor required for calls to DataSnapshot.getValue(Post.class)
-        }
-
-        public Profile(String userId, String email, String name, String userType, String age, String emergName, String emergNum) {
-            this.userId = userId;
-            this.email = email;
-            this.name = name;
-            this.userType = userType;
-            this.age = age;
-            this.emergName = emergName;
-            this.emergNum = emergNum;
-        }
-
-        @Exclude
-        public Map<String, Object> toMap() {
-            HashMap<String, Object> result = new HashMap<>();
-            result.put("userId", userId);
-            result.put("email", email);
-            result.put("name", name);
-            result.put("userType", userType);
-            result.put("age", age);
-            result.put("emergName", emergName);
-            result.put("emergNum", emergNum);
-            return result;
-        }
-    }
-
-    private void writeNewProfile(String userId, String email, String name, String userType, String age, String emerg_name, String emerg_num) {
+    private void writeNewProfile(String userId, String email, String name, Profile.UserType userType, String age,
+                                 String emerg_name, String emerg_num, String physicianId, String familyId,
+                                 String patientId) {
         // Create new post at /user-posts/$userid/$postid and at
         // /posts/$postid simultaneously
-        String key = mDatabase.child("Profile").push().getKey();
-        Profile profile = new Profile(userId, email, name, userType, age, emerg_name, emerg_num);
+//        String key = mDatabase.child("Profile").push().getKey();
+        Profile profile = new Profile(userId, email, name, userType, age,
+                emerg_name, emerg_num,physicianId,familyId,patientId, " ");
         Map<String, Object> profileValues = profile.toMap();
 
         Map<String, Object> childUpdates = new HashMap<>();
@@ -130,6 +93,7 @@ public class SignUpActivity extends AppCompatActivity {
                 .setMessage("What is your name?")
                 .setTitle("Welcome!")
                 .setPositiveButton("Next", null)
+                .setNegativeButton("Cancel",null)
                 .setView(nameInput)
                 .setCancelable(false)
                 .create();
@@ -186,10 +150,21 @@ public class SignUpActivity extends AppCompatActivity {
             }
         });
 
+        name.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                name.dismiss();
+                userType.dismiss();
+                contactNum.dismiss();
+                contact.dismiss();
+                age.dismiss();
+            }
+        });
+
         userType.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                appData.setUserType("Patient");
+                appData.setUserType(Profile.UserType.PATIENT);
                 userType.dismiss();
             }
         });
@@ -197,11 +172,14 @@ public class SignUpActivity extends AppCompatActivity {
         userType.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                appData.setUserType("Family");
+                appData.setUserType(Profile.UserType.FAMILY);
                 userType.dismiss();
                 contactNum.dismiss();
                 contact.dismiss();
                 age.dismiss();
+                appData.setAge("");
+                appData.setEmerName("");
+                appData.setEmerNum("");
             }
         });
 
@@ -305,7 +283,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 } else {
                                     writeNewProfile(auth.getCurrentUser().getUid(),auth.getCurrentUser().getEmail(),
                                             appData.getName(),appData.getUserType(),appData.getAge(),appData.getEmerName(),
-                                            appData.getEmerNum());
+                                            appData.getEmerNum(),"TBD", "TBD","TBD");
                                     startActivity(new Intent(SignUpActivity.this, HomeScreen.class)); // MainActivity
                                     finish();
                                 }

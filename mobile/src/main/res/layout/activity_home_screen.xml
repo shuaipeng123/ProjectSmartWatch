@@ -15,6 +15,17 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/app_toolbar"
+            android:layout_width="502dp"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            tools:layout_editor_absoluteX="8dp"
+            tools:layout_editor_absoluteY="57dp" />
+
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -24,27 +35,27 @@
                 android:layout_width="335dp"
                 android:layout_height="268dp"
                 android:layout_marginTop="8dp"
+                app:layout_constraintBottom_toTopOf="@+id/location"
+                app:layout_constraintHorizontal_bias="0.51"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintBottom_toTopOf="@+id/location"
                 app:layout_constraintTop_toBottomOf="@+id/heartLabel"
-                app:layout_constraintHorizontal_bias="0.51"
                 app:layout_constraintVertical_bias="0.0" />
 
             <TextView
                 android:id="@+id/heartLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Currently tracking your heart rate:"
-                android:layout_marginRight="8dp"
-                app:layout_constraintRight_toRightOf="parent"
-                android:layout_marginLeft="8dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="24dp"
+                android:text="Currently tracking your heart rate:"
                 app:layout_constraintBottom_toTopOf="@+id/settings"
                 app:layout_constraintHorizontal_bias="0.503"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.093" />
 
             <Button
@@ -65,7 +76,7 @@
                 app:layout_constraintVertical_bias="1.0" />
 
             <Button
-                android:id="@+id/call"
+                android:id="@+id/signOut"
                 android:layout_width="123dp"
                 android:layout_height="53dp"
                 android:layout_marginBottom="8dp"
@@ -73,7 +84,7 @@
                 android:layout_marginRight="8dp"
                 android:layout_marginTop="8dp"
                 android:background="@color/colorAccent"
-                android:text="Emergency Call"
+                android:text="Sign Out!"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -83,7 +94,7 @@
 
             <Button
                 android:id="@+id/input"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="53dp"
                 android:layout_marginBottom="8dp"
                 android:layout_marginLeft="8dp"
@@ -92,7 +103,7 @@
                 android:background="@color/colorAccent"
                 android:text="Record Data"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toRightOf="@+id/call"
+                app:layout_constraintLeft_toRightOf="@+id/signOut"
                 app:layout_constraintRight_toLeftOf="@+id/settings"
                 app:layout_constraintTop_toBottomOf="@+id/heartLabel"
                 app:layout_constraintVertical_bias="1.0" />
@@ -101,27 +112,17 @@
                 android:id="@+id/location"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
                 android:layout_marginTop="67dp"
                 android:gravity="center"
                 android:text="TextView"
+                app:layout_constraintBottom_toTopOf="@+id/input"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/heartLabel"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintBottom_toTopOf="@+id/input"
                 app:layout_constraintVertical_bias="0.781" />
-
-            <EditText
-                android:id="@+id/editText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="textPersonName"
-                android:text="Name"
-                tools:layout_editor_absoluteX="10dp"
-                tools:layout_editor_absoluteY="387dp" />
 
         </android.support.constraint.ConstraintLayout>
 
