@@ -64,6 +64,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     private FirebaseAuth auth;
     private DatabaseReference mDatabase;
     private Profile profile;
+    FirebaseIF firebaseIF;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,13 +78,13 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         auth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
+        firebaseIF = new FirebaseIF();
+
         ValueEventListener profileListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 try{
                     profile = dataSnapshot.child("users").child(auth.getCurrentUser().getUid()).getValue(Profile.class);
-//                    Toast.makeText(getApplicationContext(),"Database read:" + profile.email +
-//                            " Physician:" + profile.physicianId,Toast.LENGTH_SHORT).show();
                     if(profile.userType.equals(Profile.UserType.FAMILY))
                     {
                         startActivity(new Intent(HomeScreen.this, FamilyHomeScreen.class)); // Switch to Family member view
@@ -92,6 +93,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                 }catch(Exception e)
                 {
                     Toast.makeText(getApplicationContext(),"Profile query failed",Toast.LENGTH_SHORT).show();
+                    finish();
                 }
             }
 
@@ -120,7 +122,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 
                                 TextView loc1 = (TextView) findViewById(R.id.location);
                                 String address = appData.getLocation(HomeScreen.this);
-                                mDatabase.child("users").child(auth.getCurrentUser().getUid()).child("locationAddress").setValue(address);
+                                firebaseIF.updateUserLocation(address);
                                 String m = "Your location: \n" + address;
                                 loc1.setText(m);
                             }
@@ -139,7 +141,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                     TextView loc = (TextView) findViewById(R.id.location);
                     appData.setLocation(location.getLatitude(), location.getLongitude());
                     String address = appData.getLocation(HomeScreen.this);
-                    mDatabase.child("users").child(auth.getCurrentUser().getUid()).child("locationAddress").setValue(address);
+                    firebaseIF.updateUserLocation(address);
                     String message = "Your location: \n" + address;
                     loc.setText(message);
                 }
@@ -157,7 +159,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 
                                         TextView loc = (TextView) findViewById(R.id.location);
                                         String address = appData.getLocation(HomeScreen.this);
-                                        mDatabase.child("users").child(auth.getCurrentUser().getUid()).child("locationAddress").setValue(address);
+                                        firebaseIF.updateUserLocation(address);
                                         String message = "Your location: \n" + address;
                                         loc.setText(message);
                                     }
@@ -178,7 +180,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 
                                         TextView loc = (TextView) findViewById(R.id.location);
                                         String address = appData.getLocation(HomeScreen.this);
-                                        mDatabase.child("users").child(auth.getCurrentUser().getUid()).child("locationAddress").setValue(address);
+                                        firebaseIF.updateUserLocation(address);
                                         String m = "Your location: \n" + address;
                                         loc.setText(m);
                                     }
@@ -191,7 +193,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
             public void onProviderDisabled(String provider) {
                 TextView loc = (TextView) findViewById(R.id.location);
                 String message = "Your location: \n location unavailable";
-                mDatabase.child("users").child(auth.getCurrentUser().getUid()).child("locationAddress").setValue("location unavailable");
+                firebaseIF.updateUserLocation("location unavailable");
                 loc.setText(message);
             }
         });
@@ -400,9 +402,9 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     public void onConnectionSuspended(int i) {
         Toast.makeText(getApplicationContext(), "Suspended", Toast.LENGTH_LONG).show();
     }
-    public void saveSentence(View view){
-
-    }
+//    public void saveSentence(View view){
+//
+//    }
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         message = messageEvent.getPath();
@@ -424,6 +426,9 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 
         if (message.equals ("avg")) {
             appData.setHR ((int) testData);
+            firebaseIF.writeNewRecord(1,Integer.toString(appData.getTemp()),
+                    Integer.toString(appData.getBP()),Integer.toString(appData.getHR()),
+                    "NA");
 //            Toast.makeText(getApplicationContext(), String.valueOf(testData), Toast.LENGTH_SHORT).show();
         }
     }
@@ -473,9 +478,4 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         }
     }
 
-    private void updateLocation(String userId, String locationAddress) {
-//    User user = new User(name, email);
-        mDatabase.child("users").child(userId).child("locationAddress").setValue(locationAddress);
-//        mDatabase.child("locations").child(userId).setValue(locationAddress);
-    }
 }

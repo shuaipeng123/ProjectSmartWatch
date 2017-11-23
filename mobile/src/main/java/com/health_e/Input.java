@@ -20,6 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.google.firebase.database.ServerValue;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -30,8 +31,8 @@ public class Input extends AppCompatActivity {
     Model appData;
     String phoneNo;
     String message;
-    private FirebaseAuth auth;
-    private DatabaseReference mDatabase;
+//    private FirebaseAuth auth;
+//    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +41,10 @@ public class Input extends AppCompatActivity {
         setContentView(R.layout.activity_input);
         appData = Model.getInstance(getApplicationContext());
 
-        auth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+//        auth = FirebaseAuth.getInstance();
+//        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        final FirebaseIF firebaseIF = new FirebaseIF();
 
         final EditText temp = (EditText) findViewById(R.id.tempInput);
         final EditText blood = (EditText) findViewById(R.id.bloodInput);
@@ -54,12 +57,13 @@ public class Input extends AppCompatActivity {
                     appData.setTemp (Integer.valueOf(temp.getText().toString()));
                     appData.setBP (Integer.valueOf (blood.getText().toString()));
                     appData.setUpdate (Calendar.getInstance());
-                    if (auth.getCurrentUser().getUid()==null)                    {
+                    if (!FirebaseIF.loggedIn())                    {
                         Toast.makeText(getApplicationContext(), "not logged in!!",
                                 Toast.LENGTH_LONG).show();
                     }else{
-                        writeNewRecord(1, Integer.toString(appData.getTemp()), Integer.toString(appData.getBP()),
-                                "10", "5000");//, Calendar.getInstance());
+                        firebaseIF.writeNewRecord(1, Integer.toString(appData.getTemp()),
+                                Integer.toString(appData.getBP()), Integer.toString(appData.getHR()),
+                                "NA");
                     }
                     // TODO send Msg commented
 //                    sendSMSMessage();
@@ -136,19 +140,31 @@ public class Input extends AppCompatActivity {
         Log.i("Input", "onDestroy");
     }
 
-    private void writeNewRecord(int index, String temperature, String bloodPressure, String heartRate,
-                                String stepCnt) {
-        // Create new post at /user-posts/$userid/$postid and at
-        // /posts/$postid simultaneously
-        String key = mDatabase.child("records").push().getKey();
-        DataRecord dataRecord = new DataRecord(auth.getCurrentUser().getUid(),index, temperature, bloodPressure, heartRate, stepCnt);
-        Map<String, Object> dataRecordValues = dataRecord.toMap();
+//    public void writeNewRecord(int index, String temperature, String bloodPressure, String heartRate,
+//                                String stepCnt) {
+//        // Create new post at /user-posts/$userid/$postid and at
+//        // /posts/$postid simultaneously
+//        String key = mDatabase.child("records").push().getKey();
+//        DataRecord dataRecord = new DataRecord(auth.getCurrentUser().getUid(),index, temperature, bloodPressure, heartRate, stepCnt);
+//        Map<String, Object> dataRecordValues = dataRecord.toMap();
+//
+//        Map<String, Object> childUpdates = new HashMap<>();
+////        childUpdates.put("/records/" + key, dataRecordValues);
+////        childUpdates.put("/records/" + auth.getCurrentUser().getUid() , dataRecordValues);
+//        Toast.makeText(getApplicationContext(), getDate(), Toast.LENGTH_LONG).show();
+//        childUpdates.put("/records/" + auth.getCurrentUser().getUid() +"/" + getDate() , dataRecordValues);
+//        mDatabase.updateChildren(childUpdates);
+//    }
 
-        Map<String, Object> childUpdates = new HashMap<>();
-//        childUpdates.put("/records/" + key, dataRecordValues);
-//        childUpdates.put("/records/" + auth.getCurrentUser().getUid() , dataRecordValues);
-        childUpdates.put("/records/" + auth.getCurrentUser().getUid() +"/" + key , dataRecordValues);
-        mDatabase.updateChildren(childUpdates);
-    }
+//    private String getDate(){
+//        Calendar c = Calendar.getInstance();
+//        Integer year = c.get(Calendar.YEAR);
+//        Integer month = c.get(Calendar.MONTH);
+//        Integer day = c.get(Calendar.DAY_OF_MONTH);
+//        Integer HH = c.get(Calendar.HOUR_OF_DAY);
+//        Integer MM = c.get(Calendar.MINUTE) +1; //month is zero based
+//        Integer SS = c.get(Calendar.SECOND);
+//        return year.toString()+"-"+month.toString()+"-"+day.toString() + ","+HH.toString() + ":"+ MM.toString()+ ":"+SS.toString();
+//    }
 }
 

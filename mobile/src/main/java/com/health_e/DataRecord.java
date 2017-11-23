@@ -18,7 +18,6 @@ public class DataRecord {
     public String bloodPressure;
     public String heartRate;
     public String stepCnt;
-//        public Calendar date;
 
     public DataRecord() {
         // Default constructor required for calls to DataSnapshot.getValue(Post.class)
@@ -32,7 +31,6 @@ public class DataRecord {
         this.bloodPressure = bloodPressure;
         this.heartRate = heartRate;
         this.stepCnt = stepCnt;
-//            this.date = date;
     }
 
     @Exclude
@@ -44,7 +42,6 @@ public class DataRecord {
         result.put("bloodPressure", bloodPressure);
         result.put("heartRate", heartRate);
         result.put("stepCnt", stepCnt);
-//            result.put("date", date);
         return result;
     }
 }

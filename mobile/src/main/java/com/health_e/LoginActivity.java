@@ -58,6 +58,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -65,6 +70,9 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private ProgressBar progressBar;
     private Button btnSignup, btnLogin, btnReset;
+
+    private DatabaseReference mDatabase;
+    private Profile profile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,6 +156,7 @@ public class LoginActivity extends AppCompatActivity {
                                 } else {
                                     Toast.makeText(getApplicationContext(), auth.getCurrentUser().getEmail() + " Signed in",
                                             Toast.LENGTH_SHORT).show();
+//                                    userScreenSelection();
                                     Intent intent = new Intent(LoginActivity.this, HomeScreen.class);
                                     startActivity(intent);
                                     finish();
@@ -157,6 +166,40 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
+
+//    public void userScreenSelection(){
+//        ValueEventListener profileListener = new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                try{
+//                    mDatabase = FirebaseDatabase.getInstance().getReference();
+//                    profile = dataSnapshot.child("users").child(auth.getCurrentUser().getUid()).getValue(Profile.class);
+////                    Toast.makeText(getApplicationContext(),"Database read:" + profile.email +
+////                            " Physician:" + profile.physicianId,Toast.LENGTH_SHORT).show();
+//                    if(profile.userType.equals(Profile.UserType.FAMILY))
+//                    {
+//                        startActivity(new Intent(LoginActivity.this, FamilyHomeScreen.class)); // Switch to Family member view
+//                        finish();
+//                    } else if (profile.userType.equals(Profile.UserType.PATIENT)){
+//                        startActivity(new Intent(LoginActivity.this, HomeScreen.class));
+//                        finish();
+//                    } else{
+//                        Toast.makeText(getApplicationContext(),"UserType query failed",Toast.LENGTH_LONG).show();
+//                        finish();
+//                    }
+//                }catch(Exception e)
+//                {
+//                    Toast.makeText(getApplicationContext(),"Profile query failed",Toast.LENGTH_SHORT).show();
+//                    finish();
+//                }
+//            }
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                Log.w("loadPost:onCancelled", databaseError.toException());
+//            }
+//        };
+//        mDatabase.addValueEventListener(profileListener);
+//    }
 
     // this listener will be called when there is change in firebase user session
     FirebaseAuth.AuthStateListener authListener = new FirebaseAuth.AuthStateListener() {

@@ -131,6 +131,8 @@ public class Model implements Serializable {
 
     public int getBP() { return bp; }
 
+    public int getHR() { return hr; }
+
     public int getTemp() {
         return temp;
     }

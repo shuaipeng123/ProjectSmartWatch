@@ -16,6 +16,18 @@ public class Profile {
         PATIENT, PHYSICIAN, FAMILY
     }
 
+    public final String USER_ID = "userId";
+    public final String USER_EMAIL = "email";
+    public final String USER_NAME = "name";
+    public final String USER_TYPE = "userType";
+    public final String USER_AGE = "age";
+    public final String EMERGENCY_NAME = "emergName";
+    public final String EMERGENCY_NUM = "emergNum";
+    public final String PHYSICIAN_ID = "physicianId";
+    public final String FAMILY_ID = "familyId";
+    public final String PATIENT_ID = "patientId";
+    public final String LOCATION_ADDRESS = "locationAddress";
+
     public String userId;
     public String email;
     public String name;
@@ -27,6 +39,7 @@ public class Profile {
     public String familyId;
     public String patientId;
     public String locationAddress;
+
 
     public Profile() {
         // Default constructor required for calls to DataSnapshot.getValue(Profile.class)
@@ -51,17 +64,17 @@ public class Profile {
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
-        result.put("userId", userId);
-        result.put("email", email);
-        result.put("name", name);
-        result.put("userType", userType);
-        result.put("age", age);
-        result.put("emergName", emergName);
-        result.put("emergNum", emergNum);
-        result.put("physicianId",physicianId);
-        result.put("familyId",familyId);
-        result.put("patientId",patientId);
-        result.put("locationAddress",locationAddress);
+        result.put(USER_ID, userId);
+        result.put(USER_EMAIL, email);
+        result.put(USER_NAME, name);
+        result.put(USER_TYPE, userType);
+        result.put(USER_AGE, age);
+        result.put(EMERGENCY_NAME, emergName);
+        result.put(EMERGENCY_NUM, emergNum);
+        result.put(PHYSICIAN_ID,physicianId);
+        result.put(FAMILY_ID,familyId);
+        result.put(PATIENT_ID,patientId);
+        result.put(LOCATION_ADDRESS,locationAddress);
         return result;
     }
 }
