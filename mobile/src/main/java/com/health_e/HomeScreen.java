@@ -395,16 +395,16 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Wearable.MessageApi.addListener(googleApiClient, this);
-//        Toast.makeText(getApplicationContext(), "Connected to Google API Client", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Connected to Google API Client", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onConnectionSuspended(int i) {
         Toast.makeText(getApplicationContext(), "Suspended", Toast.LENGTH_LONG).show();
     }
-//    public void saveSentence(View view){
-//
-//    }
+    public void saveSentence(View view){
+
+    }
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         message = messageEvent.getPath();
@@ -412,7 +412,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 
         if (message.equals("heart") && !Double.isNaN(testData)) {
             series.appendData (new DataPoint (dataSize, testData), true, 30);
-//            Toast.makeText(getApplicationContext(), "received", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "received", Toast.LENGTH_SHORT).show();
             dataSize++;
         } else if (message.equals("call")) {
             makeEmergencyCall();
@@ -429,7 +429,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
             firebaseIF.writeNewRecord(1,Integer.toString(appData.getTemp()),
                     Integer.toString(appData.getBP()),Integer.toString(appData.getHR()),
                     "NA");
-//            Toast.makeText(getApplicationContext(), String.valueOf(testData), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), String.valueOf(testData), Toast.LENGTH_SHORT).show();
         }
     }
 
