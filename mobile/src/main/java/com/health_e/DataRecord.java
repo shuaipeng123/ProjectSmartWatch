@@ -18,19 +18,21 @@ public class DataRecord {
     public String bloodPressure;
     public String heartRate;
     public String stepCnt;
+    public String date;
 
     public DataRecord() {
         // Default constructor required for calls to DataSnapshot.getValue(Post.class)
     }
 
-    public DataRecord(String userId, int index, String temperature, String bloodPressure, String heartRate,
-                      String stepCnt) {
+    public DataRecord(String userId, int index, String temperature, String bloodPressure,
+                      String heartRate, String stepCnt, String date) {
         this.userId = userId;
         this.index = index;
         this.temperature = temperature;
         this.bloodPressure = bloodPressure;
         this.heartRate = heartRate;
         this.stepCnt = stepCnt;
+        this.date = date;
     }
 
     @Exclude
@@ -42,6 +44,7 @@ public class DataRecord {
         result.put("bloodPressure", bloodPressure);
         result.put("heartRate", heartRate);
         result.put("stepCnt", stepCnt);
+        result.put("date", date);
         return result;
     }
 }

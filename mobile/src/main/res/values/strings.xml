@@ -78,6 +78,11 @@
     <string name="lbl_forgot_password">Forgot password?</string>
     <string name="forgot_password_msg">We just need your registered Email Id to sent you password reset instructions.</string>
 
+    <!-- Strings related to Family Home Screen -->
+    <string name="patientLocation">Patient Location</string>
+    <string name="familySignOut">Sign Out</string>
+    <string name="familyShowOnMap">Map</string>
+
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>

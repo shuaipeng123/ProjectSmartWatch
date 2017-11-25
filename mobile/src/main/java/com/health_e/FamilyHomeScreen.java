@@ -1,5 +1,7 @@
 package com.health_e;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,15 +28,8 @@ import java.util.List;
 public class FamilyHomeScreen extends AppCompatActivity {
 
     private FirebaseAuth auth;
-    private DatabaseReference mDatabase;
-//    private DataRecord dataRecord;
     private Profile profile;
-
-    List<DataRecord> dataRecordList = new ArrayList<>();
-
-    private GraphView hRateGraph;
-    private GraphView bPressureGraph;
-    private GraphView bTemperatureGraph;
+    private String patient_address;
 //    LineGraphSeries<DataPoint> hRateSeries = new LineGraphSeries<>();
 //    LineGraphSeries<DataPoint> bPressureSeries  = new LineGraphSeries<>();
 //    LineGraphSeries<DataPoint> bTemperatureSeries = new LineGraphSeries<>();
@@ -49,18 +44,17 @@ public class FamilyHomeScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_family_home_screen);
         auth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        patient_address = "";
         // loading family user profile
         ValueEventListener profileListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                try{
+                if(auth!=null && auth.getCurrentUser()!=null) {
                     profile = dataSnapshot.child("users").child(auth.getCurrentUser().getUid()).getValue(Profile.class);
 //                    Toast.makeText(getApplicationContext(),"patientId:" + profile.patientId,Toast.LENGTH_SHORT).show();
-                }catch(Exception e)
-                {
-                    Toast.makeText(getApplicationContext(),"Database query failed",Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getApplicationContext(),"User profile query failed",Toast.LENGTH_SHORT).show();
                     finish();
                 }
             }
@@ -80,17 +74,18 @@ public class FamilyHomeScreen extends AppCompatActivity {
                     for (DataSnapshot userId : userIds) {
                         if(profile!=null) {
                             if (userId.getKey().equals(profile.patientId)) {
-//                                Toast.makeText(getApplicationContext(),"patient found" ,Toast.LENGTH_SHORT).show();
+//                              Toast.makeText(getApplicationContext(),"patient found" ,Toast.LENGTH_SHORT).show();
                                 Iterable<DataSnapshot> dataRecords = userId.getChildren();
-                                for (DataSnapshot udataRecord : dataRecords) {
-                                    DataRecord dataRecord = udataRecord.getValue(DataRecord.class);
-                                    //dataRecordList.add(dataRecord);
-                                    hRateSeries.appendData (new DataPoint (dataSize, Integer.valueOf(dataRecord.heartRate)), true, 30);
-                                    bPressureSeries.appendData (new DataPoint (dataSize, Integer.valueOf(dataRecord.bloodPressure)), true, 30);
-                                    bTemperatureSeries.appendData (new DataPoint (dataSize, Integer.valueOf(dataRecord.temperature)), true, 30);
-//            Toast.makeText(getApplicationContext(), "received", Toast.LENGTH_SHORT).show();
-                                    dataSize++;
-//                                    Toast.makeText(getApplicationContext(),"BP:" + dataRecord.bloodPressure,Toast.LENGTH_SHORT).show();
+                                for (DataSnapshot uDataRecord : dataRecords) {
+                                    DataRecord dataRecord = uDataRecord.getValue(DataRecord.class);
+                                    if (dataRecord!=null) {
+                                        hRateSeries.appendData(new DataPoint(dataSize, Integer.valueOf(dataRecord.heartRate)), true, 30);
+                                        bPressureSeries.appendData(new DataPoint(dataSize, Integer.valueOf(dataRecord.bloodPressure)), true, 30);
+                                        bTemperatureSeries.appendData(new DataPoint(dataSize, Integer.valueOf(dataRecord.temperature)), true, 30);
+                                        //                                  Toast.makeText(getApplicationContext(), "received", Toast.LENGTH_SHORT).show();
+                                        dataSize++;
+                                        //                                  Toast.makeText(getApplicationContext(),"BP:" + dataRecord.bloodPressure,Toast.LENGTH_SHORT).show();
+                                    }
                                 }
                             }
                         }
@@ -110,15 +105,15 @@ public class FamilyHomeScreen extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 try{
-                    String address = (String) dataSnapshot.child("users").child(profile.patientId).child(profile.LOCATION_ADDRESS).getValue();
+                    patient_address = (String) dataSnapshot.child("users").child(profile.patientId).child(profile.LOCATION_ADDRESS).getValue();
 //                    Toast.makeText(getApplicationContext(),"address read done" ,Toast.LENGTH_SHORT).show();
-
                     TextView loc = (TextView) findViewById(R.id.location);
-                    String message = "Patient's location: \n" + address;
+                    String message = "Patient's location: \n" + patient_address;
                     loc.setText(message);
                 }catch(Exception e)
                 {
                     Toast.makeText(getApplicationContext(),"address query failed",Toast.LENGTH_SHORT).show();
+                    patient_address = "";
                 }
             }
             @Override
@@ -132,17 +127,30 @@ public class FamilyHomeScreen extends AppCompatActivity {
         signOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), auth.getCurrentUser().getEmail() + " Signed out",
-                        Toast.LENGTH_LONG).show();
+                if (auth!=null && auth.getCurrentUser()!=null){
+                    Toast.makeText(getApplicationContext(), auth.getCurrentUser().getEmail() + " Signed out",
+                            Toast.LENGTH_LONG).show();
+                }
                 if (auth != null){
                     auth.signOut();
                 }
                 finish();
-//                System.exit(0);
             }
         });
 
-        hRateGraph = (GraphView) findViewById(R.id.hRateGraph);
+        Button showOnMap = (Button) findViewById(R.id.showOnMap);
+        showOnMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!patient_address.equals("")) {
+                    String map = "http://maps.google.co.in/maps?q=" + patient_address;
+                    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(map));
+                    startActivity(i);
+                }
+            }
+        });
+
+        GraphView hRateGraph = (GraphView) findViewById(R.id.hRateGraph);
         hRateGraph.setTitle("Heart Rate");
         hRateGraph.getViewport().setXAxisBoundsManual(true);
         hRateGraph.getViewport().setMinX (0);
@@ -153,7 +161,7 @@ public class FamilyHomeScreen extends AppCompatActivity {
         hRateGraph.getGridLabelRenderer().setPadding(40);
         hRateGraph.addSeries(hRateSeries);
 
-        bPressureGraph = (GraphView) findViewById(R.id.bPressureGraph);
+        GraphView bPressureGraph = (GraphView) findViewById(R.id.bPressureGraph);
         bPressureGraph.setTitle("Blood Pressure");
         bPressureGraph.getViewport().setXAxisBoundsManual(true);
         bPressureGraph.getViewport().setMinX (0);
@@ -164,7 +172,7 @@ public class FamilyHomeScreen extends AppCompatActivity {
         bPressureGraph.getGridLabelRenderer().setPadding(40);
         bPressureGraph.addSeries(bPressureSeries);
 
-        bTemperatureGraph = (GraphView) findViewById(R.id.bTemperatureGraph);
+        GraphView bTemperatureGraph = (GraphView) findViewById(R.id.bTemperatureGraph);
         bTemperatureGraph.setTitle("Body Temperature");
         bTemperatureGraph.getViewport().setXAxisBoundsManual(true);
         bTemperatureGraph.getViewport().setMinX (0);

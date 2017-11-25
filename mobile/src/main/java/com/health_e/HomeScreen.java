@@ -60,11 +60,12 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
     GraphView graph;
     int dataSize = 0;
-    // private DocumentReference mDocRef= FirebaseFirestore.getInstance().document("sampleData/inspiration");   AliN
     private FirebaseAuth auth;
     private DatabaseReference mDatabase;
     private Profile profile;
     FirebaseIF firebaseIF;
+    final static int HR_RECORD_DS_RATE = 30;    // every HR_RECORD_DS_RATE x 2 seconds
+    int dsCnt =0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +80,12 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         firebaseIF = new FirebaseIF();
+
+        if(auth==null || auth.getCurrentUser()==null)
+        {
+            startActivity(new Intent(HomeScreen.this, LoginActivity.class));
+            finish();
+        }
 
         ValueEventListener profileListener = new ValueEventListener() {
             @Override
@@ -395,7 +402,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Wearable.MessageApi.addListener(googleApiClient, this);
-        Toast.makeText(getApplicationContext(), "Connected to Google API Client", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getApplicationContext(), "Connected to Google API Client", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -412,7 +419,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 
         if (message.equals("heart") && !Double.isNaN(testData)) {
             series.appendData (new DataPoint (dataSize, testData), true, 30);
-            Toast.makeText(getApplicationContext(), "received", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "received", Toast.LENGTH_SHORT).show();
             dataSize++;
         } else if (message.equals("call")) {
             makeEmergencyCall();
@@ -426,10 +433,14 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 
         if (message.equals ("avg")) {
             appData.setHR ((int) testData);
-            firebaseIF.writeNewRecord(1,Integer.toString(appData.getTemp()),
-                    Integer.toString(appData.getBP()),Integer.toString(appData.getHR()),
-                    "NA");
-            Toast.makeText(getApplicationContext(), String.valueOf(testData), Toast.LENGTH_SHORT).show();
+            dsCnt++;
+            if (dsCnt > HR_RECORD_DS_RATE) {
+                dsCnt = 0;
+                firebaseIF.writeNewRecord(1, Integer.toString(appData.getTemp()),
+                        Integer.toString(appData.getBP()), Integer.toString(appData.getHR()),
+                        "NA");
+//                Toast.makeText(getApplicationContext(), String.valueOf(testData), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
